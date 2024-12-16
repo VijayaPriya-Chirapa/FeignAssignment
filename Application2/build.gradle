@@ -1,46 +1,76 @@
+
 plugins {
 	id 'java'
-	id 'war'
 	id 'org.springframework.boot' version '3.4.0'
 	id 'io.spring.dependency-management' version '1.1.6'
+	id 'io.gatling.gradle' version '3.13.1'
 }
-
+ 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
-
+ 
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(17)
 	}
 }
-
+ 
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+ 
 repositories {
 	mavenCentral()
 	maven { url 'https://repo.spring.io/milestone' }
 }
-
+ 
 ext {
 	set('springCloudVersion', "2024.0.0-RC1")
 }
-
+ 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	//implementation 'ch.qos.logback:logback-classic:1.2.10'
-    //implementation 'org.slf4j:slf4j-api:1.7.32'
+	implementation 'org.mapstruct:mapstruct:1.5.3.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly 'com.h2database:h2'
+    implementation 'org.springframework.cloud:spring-cloud-starter-config'
+    implementation 'org.springframework.cloud:spring-cloud-config-server'
+    
+    //circuit breaker
+    implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.0.2'
+    
+    //gatling
+    implementation 'io.gatling:gatling-core:3.13.1'   // Core Gatling library
+    implementation 'io.gatling:gatling-http:3.13.1'   // HTTP module for Gatling
+    implementation 'io.gatling.highcharts:gatling-charts-highcharts:3.13.1'  // Highcharts for Gatling results
+    implementation 'org.scala-lang:scala-library:2.13.15'  // Scala library dependency
+    testImplementation 'org.scala-js:scalajs-test-bridge_2.13:1.17.0'
+    implementation  'com.typesafe:config:1.3.1'
+ 
+	
+ 
+tasks.withType(JavaCompile) {
+    options.annotationProcessorPath = configurations.annotationProcessor
 }
-
+}
+ 
 dependencyManagement {
 	imports {
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
 	}
 }
-
+ 
 tasks.named('test') {
 	useJUnitPlatform()
 }
